@@ -1,11 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
+interface Movie {
+  Title: string;
+  Year: string;
+  imdbID: string;
+  Type: string;
+  Poster: string;
+}
+
 function App() {
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [rankedList, setRankedList] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [count, setCount] = useState(0)
+
+  const API_KEY: string = "YOUR_OMDB_API_KEY";
+
+  const searchMovies = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!searchTerm) return;
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${searchTerm}&type=movie`);
+      const data = await response.json();
+
+      if (data.Response === 'True') {
+        setSearchResults(data.Search);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch OMDb data:", err);
+      alert("Failed to fetch data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
